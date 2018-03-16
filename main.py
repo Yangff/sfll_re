@@ -95,15 +95,15 @@ def runAnalysis(cmd):
     if (that_output == ''):
         print('Cannot find related key of keyinputs, please check the keyinputs.')
         sys.exit(2)
-    print('HD circuit datacted. That output node is \'' + that_output + '\', with circuit size of ' + str(len(hdRelated)) + '.')
-    print('Find ' + str(len(criticalInput)) + ' HD-related inputs, should be cirtical inputs.')
+    print('HD circuit datacted. That output node is \'' + that_output + '\', with a circuit size of ' + str(len(hdRelated)) + '.')
+    print('Find ' + str(len(criticalInput)) + ' HD-related inputs, should be the input bit(s) xor with key.')
     if VERBOSE:
         for i in key2In:
             print(i + ' xored with ' + key2In[i])
 
     mSubCircuit = set()
     findSource(that_output, mSubCircuit)
-    print(that_output + ' related sub circuit splitted, with size of ' + str(len(mSubCircuit)))
+    print(that_output + ' related sub-circuit splitted, with size of ' + str(len(mSubCircuit)))
 
     # step 3-2: find FSC2 output/so-called perturb
     # features: 
@@ -129,7 +129,7 @@ def runAnalysis(cmd):
             perturb = i
             break
     if perturb == '':
-        print('Cannot find output of FSC circuit, please specific one.')
+        print('Cannot find output of FSC circuit, maybe you can specific one.')
         sys.exit(2)
     print('Find output of FSC circuit(so called perturb): \'' + perturb + '\'. ')
 
@@ -165,7 +165,7 @@ def runAnalysis(cmd):
         should_get = 1
     else:
         should_get = 0
-    print('Possibility of [\'' + perturb + '\' = 0] is ' + str(P) +', which means we need solve \'' + perturb + '\' = ' + str(should_get))
+    print('Possibility of [\'' + perturb + '\' = 0] is ' + str(P) +', which means we need to solve \'' + perturb + '\' = ' + str(should_get))
     s = z3.Solver()
     z3Nodes = {}
     def allocNode(name):
@@ -196,11 +196,11 @@ def runAnalysis(cmd):
     print('result: ' + str(sat_result))
     sat_inputs = {}
     if (str(sat_result) == 'unsat'):
-        print('Something went wrong when solving ' + perturb + ' = 1, cannot get a input')
+        print('Something goes wrong when solving ' + perturb + ' = 1, cannot get an input')
     else:
         m = s.model()
         sat_inputs = {i:m.evaluate(allocNode(i)) for i in criticalInput}
-    print('Find ' + str(len(sat_inputs)), ' input(s). Test with oracle.')
+    print('Found ' + str(len(sat_inputs)), 'bits of input. Test with oracle.')
     if VERBOSE:
         print(sat_inputs)
 
@@ -269,7 +269,7 @@ def runAnalysis(cmd):
     if (model_output == oracle_output):
         print('There maybe something wrong with the sat solver/ analysis or maybe key = 0')
         sys.exit()
-    print('We get a input causes the circuit having wrong result. Try to recovery the original key')
+    print('We get an input that causes the circuit having wrong result. Trying to recover the original key')
     
     def eval_nochace(res, x):
         eval_cached = {}
