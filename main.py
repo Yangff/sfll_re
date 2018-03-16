@@ -356,7 +356,7 @@ def runAnalysis(cmd):
         print(rec_keysB)
         print("flips: ")
         print(flips)
-    print("Flipped count is " + str(len(flips)), ", so the result with H nears this number is more likely to be the correct one.")
+    
 import getopt
 
 def main(argv):
