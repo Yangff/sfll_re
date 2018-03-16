@@ -365,11 +365,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hvi:e:",["ifile=", "exefile"])
     except getopt.GetoptError:
-        print('main.py -i <inputfile>')
+        print('main.py -i <inputfile> -e <oracle path>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('main.py -i <inputfile>')
+            print('main.py -i <inputfile> -e <oracle path>')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg

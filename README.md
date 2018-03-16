@@ -12,6 +12,6 @@ Python3, z3-solver, verilator
 1. Clone the project with submodule
 2. Run the following command, `-i` is bench file and `-e` is oracle.
 ```sh
-main.py -i ./target/benchmarks/sfll_hd/dfx_sfll_k256_h32.bench -e ./target/bin/DfX_64bit
+python3 main.py -i ./target/benchmarks/sfll_hd/dfx_sfll_k256_h32.bench -e ./target/bin/DfX_64bit
 ```
 3. In fact this whole thing can run without an oracle with some tiny modify.
