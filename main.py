@@ -4,6 +4,7 @@ import sys
 
 VERBOSE = False
 ExecPath = './DfX_64bit'
+NoOracle = True
 import re
 class F:
     def __init__(self, x):
@@ -263,14 +264,17 @@ def runAnalysis(cmd):
     # step 4-1: check the correctness of sat
     eval_cache = {}
     keys = {}
-    model_output = evalx(sat_inputs, eval_cache, keys, that_output)
-    oracle_output = runOracle(sat_inputs)[that_output]
-    print('Model with key = 0 get a result of ' + str(model_output) + ' and Oracle returns ' + str(oracle_output == '1'))
-    if (model_output == oracle_output):
-        print('There maybe something wrong with the sat solver/ analysis or maybe key = 0')
-        sys.exit()
-    print('We get an input that causes the circuit having wrong result. Trying to recover the original key')
-    
+    if not NoOracle:
+        model_output = evalx(sat_inputs, eval_cache, keys, that_output)
+        oracle_output = runOracle(sat_inputs)[that_output]
+        print('Model with key = 0 get a result of ' + str(model_output) + ' and Oracle returns ' + str(oracle_output == '1'))
+        if (model_output == oracle_output):
+            print('There maybe something wrong with the sat solver/ analysis or maybe key = 0')
+            sys.exit()
+        print('We get an input that causes the circuit having wrong result. Trying to recover the original key')
+    else:
+        print("No oracle, try to recover key directly.")
+
     def eval_nochace(res, x):
         eval_cached = {}
         keys = {}
@@ -312,9 +316,35 @@ def runAnalysis(cmd):
         res[change] = not res[change]
         return (equset, nequset, flips)
 
-    equset, nequset, flips = attacker(sat_inputs)
+    def attack_nooracle(res):
+        icnt = 0
+        flips = []
+        keys = list(res.keys())
+        change = keys[0]
+        others = keys[1:]
 
-    # TypeA. flip on zero, nequset is all one
+        equset = []
+        nequset = []
+        res[change] = not res[change]
+        allTask = len(others)
+        for i in others:
+            icnt = icnt + 1
+            if VERBOSE or (icnt % 10 == 0):
+                print('Working on ' + str(icnt) + '/' + str(allTask))
+            res[i] = not res[i]
+            r2, f = eval_nochace(res, that_output)
+            if (f == True):
+                flips.append(i)
+                nequset.append(i)
+            else:
+                equset.append(i)
+            if VERBOSE:
+                print('Model returns ' + str(r2))
+            res[i] = not res[i]
+        equset.append(change)
+        res[change] = not res[change]
+        return (equset, nequset, flips)
+
     def getFlippedInput(inp, flip):
         res = {}
         for i in inp:
@@ -331,7 +361,14 @@ def runAnalysis(cmd):
             else:
                 sss = sss + "0"
         return sss
+    _att = None
+    if NoOracle:
+        _att = attack_nooracle
+    else:
+        _att = attacker
+    equset, nequset, flips = _att(sat_inputs)
 
+    # TypeA. flip on zero, nequset is all one
     numHA = len(nequset)
     inpA = getFlippedInput(sat_inputs, nequset)
     rec_keysA = {i:inpA[key2In[i]] for i in key2In}
@@ -363,7 +400,7 @@ def main(argv):
     inputfile = ''
     outputfile = ''
     try:
-        opts, args = getopt.getopt(argv,"hvi:e:",["ifile=", "exefile"])
+        opts, args = getopt.getopt(argv,"hvi:e:",["ifile=", "exefile="])
     except getopt.GetoptError:
         print('main.py -i <inputfile> -e <oracle path>')
         sys.exit(2)
@@ -380,6 +417,7 @@ def main(argv):
         if (opt in ("-e", "--exefile")):
             global ExecPath
             ExecPath = arg
+            NoOracle = False
 
     orgInputs = ''
     if (inputfile == ''):

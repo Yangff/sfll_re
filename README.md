@@ -17,4 +17,5 @@ git clone --recurse-submodules https://github.com/Yangff/sfll_re.git
 ```sh
 python3 main.py -i ./target/benchmarks/sfll_hd/dfx_sfll_k256_h32.bench -e ./target/bin/DfX_64bit
 ```
-3. The result will give you two possible complementary bitstreams with `H` and `N-H`. If you can set `H`, they are both solutions of the original circuit.  You can also get two/three possible results directly from the `flipped` bits, which can be done without the assist of an oracle. In fact this whole thing can run without an oracle with some tiny modify.
+3. The result will give you two possible complementary bitstreams with `H` and `N-H`. If you can set `H`, they are both solutions of the original circuit.  
+4. Or, if you don't have any oracle, you can still run this attack without `-e` arguemnt and it will give you the same result as you have the oracle. This is because we can observe perturb node and use it as an oracle. 
